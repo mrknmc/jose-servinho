@@ -1,4 +1,7 @@
 var Botkit = require('botkit');
+var mongoStorage = require('botkit-storage-mongo')({
+    mongoUri: process.env.MONGODB_URI
+});
 
 
 function makeInitialMessage(signedUp) {
@@ -108,9 +111,10 @@ function addUsers(userList, usersToAdd) {
 
 
 
+
 var controller = Botkit.slackbot({
     debug: false,
-    json_file_store: 'db.json',
+    storage: mongoStorage
 }).configureSlackApp({
     // rtm_receive_messages: false,
     clientId: process.env.CLIENT_ID,
