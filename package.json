@@ -1,0 +1,11 @@
+{
+  "name": "jose-servinho",
+  "version": "0.0.1",
+  "description": "Jose Servinho is the man",
+  "scripts": {
+      "start": "PORT=8765 node bot.js"
+  },
+  "dependencies": {
+    "botkit": "^0.4.10"
+  }
+}
