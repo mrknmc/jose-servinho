@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "description": "Jose Servinho is the man",
   "scripts": {
-      "start": "node bot.js"
+    "start": "node bot.js"
   },
   "dependencies": {
-    "botkit": "^0.4.10"
+    "botkit": "^0.4.10",
+    "botkit-storage-mongo": "^1.0.4"
   }
 }
