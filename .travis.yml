@@ -1,3 +1,10 @@
 language: node_js
 node_js:
   - node
+deploy:
+  provider: heroku
+  api_key:
+    secure: H0fz8lyqIwj+iWZF2UbahB1xLUqqQjRV0G8aqulifUmDB8Va9Tk/RZtfcVb8CO8uynPIEq2/hJK3JZjF3vCF/LjQYMHl4KCk3ZFB7snrkYuoLsDATJfW7cvozBp7iTvxdfEI11mTK9LKS0yKzauiBM9U3LxdxedfcUVNUJKmOYhNi1WdDLQTPfz+pEAQ0KpykJg4UmijPGK23k6B5FA4fCqUqtXFWfDjCcwmLiTklGtAkE1mOBQEYZDVJPQnE477pv6OCJqLGTwPg1qEiVZaKOgRj9YUpeH3cVzPabLW7lXeHibpos6SV4xnvTUtZ4riXwTpvUdfhKdW13RQKMXb0b+ImZ3gCxHxoGjwhLFHNyNpx9nNNq+AQ/YVPYNpCOqNrH7BZBtZAaCz6o+vf0mrBRmyV4xruQ8RYxAs2ICQUF2OpOZqYnzibeokwbEvsN4Cd0DqdeDsECnbjmyh6nYjni7AvJriGEdPMLm68WlsC89HuUGsWSvsAZYT+W7wSl24UUysM1KFpXS70kjAgSA8WbYqZxV5iJZWBeoC3sUNX1V42Ne9K+iEpyUhT/eT6LQdAemO5dJQ/6p+mo/ivMuKjiP69uSaDuUcpsdx44IWtbmh1vs9WSeTbZ/luGAHghk0xvEbDYUh3Ettqxyq/BLKhgYEwfkWb2bGO4A0sk6cxz0=
+  app: jose-servinho
+  on:
+    repo: mrknmc/jose-servinho
