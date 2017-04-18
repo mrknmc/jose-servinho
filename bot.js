@@ -110,8 +110,6 @@ function addUsers(userList, usersToAdd) {
 }
 
 
-
-
 var controller = Botkit.slackbot({
     debug: false,
     storage: mongoStorage
@@ -136,29 +134,34 @@ controller.setupWebserver(process.env.PORT, function(err, webserver) {
 
 
 controller.on('interactive_message_callback', function(bot, message) {
-    if (message.callback_id === 'initial' || message.callback_id === 'final') {
-        var action = message.actions[0].name;
-        bot.api.users.profile.get({user: message.user}, function(error, resp) {
-            var username = resp.user.name;
-            controller.storage.channels.get(message.channel, function(err, data) {
-                var signedUp = data.signedUp;
-                var initiatedBy = data.initiatedBy;
-                if (action == 'notIn') {
-                    removeUser(signedUp, username);
-                    // bot.replyPrivateDelayed(message, 'Yo, you should let the team know you pulled out.');
-                } else if (action == 'imIn') {
-                    addUser(signedUp, username);
-                }
-                bot.replyInteractive(message, makeMessage(signedUp));
-                controller.storage.channels.save({
-                    id: message.channel,
-                    initiatedBy: initiatedBy,
-                    originalMessage: data.originalMessage,
-                    signedUp: signedUp
-                });
+    if (message.callback_id !== 'initial' && message.callback_id !== 'final') {
+        return;
+    }
+
+    var action = message.actions[0].name;
+    console.log(JSON.stringify(bot.api.users));
+    console.log(JSON.stringify(bot.api.users.profile));
+    console.log(JSON.stringify(bot.api.users.info));
+    bot.api.users.profile.get({user: message.user}, function(error, resp) {
+        var username = resp.user.name;
+        controller.storage.channels.get(message.channel, function(err, data) {
+            var signedUp = data.signedUp;
+            var initiatedBy = data.initiatedBy;
+            if (action == 'notIn') {
+                removeUser(signedUp, username);
+                // bot.replyPrivateDelayed(message, 'Yo, you should let the team know you pulled out.');
+            } else if (action == 'imIn') {
+                addUser(signedUp, username);
+            }
+            bot.replyInteractive(message, makeMessage(signedUp));
+            controller.storage.channels.save({
+                id: message.channel,
+                initiatedBy: initiatedBy,
+                originalMessage: data.originalMessage,
+                signedUp: signedUp
             });
         });
-    }
+    });
 });
 
 
