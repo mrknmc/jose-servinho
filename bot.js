@@ -139,11 +139,8 @@ controller.on('interactive_message_callback', function(bot, message) {
     }
 
     var action = message.actions[0].name;
-    console.log(JSON.stringify(bot.api));
-    console.log(JSON.stringify(bot.api.users));
-    console.log(JSON.stringify(bot.api.users.info));
     bot.api.users.info({user: message.user}, function(error, resp) {
-        console.log(resp);
+        console.log(JSON.stringify(resp));
         var username = resp.user.name;
         controller.storage.channels.get(message.channel, function(err, data) {
             var signedUp = data.signedUp;
