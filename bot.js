@@ -139,6 +139,7 @@ controller.on('interactive_message_callback', function(bot, message) {
     }
 
     var action = message.actions[0].name;
+    console.log(JSON.stringify(bot.api));
     console.log(JSON.stringify(bot.api.users));
     console.log(JSON.stringify(bot.api.users.profile));
     console.log(JSON.stringify(bot.api.users.info));
