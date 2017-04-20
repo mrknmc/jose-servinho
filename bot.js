@@ -122,8 +122,7 @@ var controller = Botkit.slackbot({
 
 controller.setupWebserver(process.env.PORT, function(err, webserver) {
     controller.createWebhookEndpoints(webserver);
-
-    controller.createOauthEndpoints(controller.webserver, function(err,req,res) {
+    controller.createOauthEndpoints(webserver, function(err, req, res) {
         if (err) {
             res.status(500).send('ERROR: ' + err);
         } else {
@@ -139,6 +138,8 @@ controller.on('interactive_message_callback', function(bot, message) {
     }
 
     var action = message.actions[0].name;
+    console.log(JSON.stringify(message));
+    console.log(JSON.stringify(message.user));
     bot.api.users.info({user: message.user}, function(error, resp) {
         console.log(JSON.stringify(resp));
         var username = resp.user.name;
