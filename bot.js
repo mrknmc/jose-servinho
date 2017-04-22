@@ -1,10 +1,10 @@
 var Botkit = require('botkit');
 var mongoStorage = require('botkit-storage-mongo')({
-    mongoUri: process.env.MONGODB_URI
+    mongoUri: process.env.MONGODB_URI || 'localhost'
 });
 
 
-function makeInitialMessage(signedUp, dropouts) {
+function makeMessage(signedUp, dropouts) {
     var msg = {
         "text": "Sign up open for football fives next Monday night! 7pm, £3 at Peffermill as usual.",
         "attachments": [
@@ -111,14 +111,6 @@ function addUser(userList, user) {
     return userList;
 }
 
-function addUsers(userList, usersToAdd) {
-    for (var i = 0; i++; i < usersToAdd.length) {
-        var userToAdd = usersToAdd[i];
-        addUser(userList, userToAdd);
-    }
-    return userList;
-}
-
 
 function getUsersByTitle(message, title) {
     var attachments = message.original_message.attachments;
@@ -149,57 +141,67 @@ function getSignedUp(message) {
     return getUsersByTitle(message, 'Signed up');
 }
 
+function run() {
+    var controller = Botkit.slackbot({
+        debug: false,
+        storage: mongoStorage
+    }).configureSlackApp({
+        // rtm_receive_messages: false,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        scopes: ['commands', 'chat:write:bot'],
+    });
 
-var controller = Botkit.slackbot({
-    debug: false,
-    storage: mongoStorage
-}).configureSlackApp({
-    // rtm_receive_messages: false,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    scopes: ['commands', 'chat:write:bot'],
-});
+    controller.setupWebserver(process.env.PORT, function(err, webserver) {
+        controller.createWebhookEndpoints(webserver);
+        controller.createOauthEndpoints(webserver, function(err, req, res) {
+            if (err) {
+                res.status(500).send('ERROR: ' + err);
+            } else {
+                res.send('Success!');
+            }
+        });
+    });
 
-controller.setupWebserver(process.env.PORT, function(err, webserver) {
-    controller.createWebhookEndpoints(webserver);
-    controller.createOauthEndpoints(webserver, function(err, req, res) {
-        if (err) {
-            res.status(500).send('ERROR: ' + err);
-        } else {
-            res.send('Success!');
+
+    controller.on('interactive_message_callback', function(bot, message) {
+        if (message.callback_id !== 'initial' && message.callback_id !== 'final') {
+            return;
+        }
+
+        var action = message.actions[0].name;
+        var username = message.user;
+
+        var signedUp = getSignedUp(message);
+        var dropouts = getDropouts(message);
+
+        if (action == 'notIn') {
+            removeUser(signedUp, username);
+            addUser(dropouts, username);
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
+        } else if (action == 'imIn') {
+            removeUser(dropouts, username);
+            addUser(signedUp, username);
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
+        } else if (action == 'close') {
+            bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
         }
     });
-});
 
 
-controller.on('interactive_message_callback', function(bot, message) {
-    if (message.callback_id !== 'initial' && message.callback_id !== 'final') {
-        return;
-    }
+    controller.on('slash_command', function(bot, message) {
+        if (message.command !== '/jose') {
+            return;
+        }
+        bot.replyPublic(message, makeMessage([], []));
+    });
 
-    var action = message.actions[0].name;
-    var username = message.user;
+}
 
-    var signedUp = getSignedUp(message);
-    var dropouts = getDropouts(message);
+if (require.main === module) {
+    run();
+}
 
-    if (action == 'notIn') {
-        removeUser(signedUp, username);
-        addUser(dropouts, username);
-        bot.replyInteractive(message, makeInitialMessage(signedUp, dropouts));
-    } else if (action == 'imIn') {
-        removeUser(dropouts, username);
-        addUser(signedUp, username);
-        bot.replyInteractive(message, makeInitialMessage(signedUp, dropouts));
-    } else if (action == 'close') {
-        bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
-    }
-});
-
-
-controller.on('slash_command', function(bot, message) {
-    if (message.command !== '/jose') {
-        return;
-    }
-    bot.replyPublic(message, makeInitialMessage([], []));
-});
+exports.addUser = addUser;
+exports.removeUser = removeUser;
+exports.getUsersByTitle = getUsersByTitle;
