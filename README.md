@@ -14,7 +14,7 @@ npm install
 
 ## Running the tests
 
-Run tests as follows (mocha and sinon are dependencies):
+Run tests as follows (mocha is a dependency):
 
 ```
 npm test
