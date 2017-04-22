@@ -22,13 +22,13 @@ npm test
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/mrknmc/jose-servinho/tags).
 
 ## Authors
 
 * **Mark Nemec** - *Initial work* - [Mark Nemec](https://github.com/mrknmc)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/mrknmc/jose-servinho/contributors) who participated in this project.
 
 ## License
 
