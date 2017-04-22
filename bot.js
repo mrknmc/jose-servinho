@@ -2,6 +2,8 @@ var Botkit = require('botkit');
 var mongoStorage = require('botkit-storage-mongo')({
     mongoUri: process.env.MONGODB_URI || 'localhost'
 });
+const DROPOUTS_TITLE = 'Dropped out';
+const SIGNED_UP_TITLE = 'Signed up';
 
 
 function makeMessage(signedUp, dropouts) {
@@ -36,7 +38,7 @@ function makeMessage(signedUp, dropouts) {
     };
     if (dropouts.length > 0) {
         msg.attachments[0].fields.push({
-            "title": "Dropped out",
+            "title": DROPOUTS_TITLE,
             "value": dropouts.map(function (user) {
                 return '<@' + user + '>';
             }).join(),
@@ -44,7 +46,7 @@ function makeMessage(signedUp, dropouts) {
     }
     if (signedUp.length > 0) {
         msg.attachments[0].fields.push({
-            "title": "Signed up",
+            "title": SIGNED_UP_TITLE,
             "value": signedUp.map(function (user) {
                 return '<@' + user + '>';
             }).join(),
@@ -73,7 +75,7 @@ function makeFinalMessage(signedUp, dropouts) {
                 "attachment_type": "default",
                 "fields": [
                     {
-                        "title": "Signed up",
+                        "title": SIGNED_UP_TITLE,
                         "value": signedUp.map(function (user) {
                             return '<@' + user + '>';
                         }).join(),
@@ -133,12 +135,12 @@ function getUsersByTitle(message, title) {
 }
 
 function getDropouts(message) {
-    return getUsersByTitle(message, 'Dropped out');
+    return getUsersByTitle(message, DROPOUTS_TITLE);
 }
 
 
 function getSignedUp(message) {
-    return getUsersByTitle(message, 'Signed up');
+    return getUsersByTitle(message, SIGNED_UP_TITLE);
 }
 
 function run() {
@@ -146,7 +148,6 @@ function run() {
         debug: false,
         storage: mongoStorage
     }).configureSlackApp({
-        // rtm_receive_messages: false,
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
         scopes: ['commands', 'chat:write:bot'],
