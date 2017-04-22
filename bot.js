@@ -4,9 +4,9 @@ var mongoStorage = require('botkit-storage-mongo')({
 });
 
 
-function makeInitialMessage(signedUp) {
+function makeInitialMessage(signedUp, dropouts) {
     var msg = {
-        "text": "Sign up open for next Monday night! 7pm, £3 at Peffermill as usual.",
+        "text": "Sign up open for football fives next Monday night! 7pm, £3 at Peffermill as usual.",
         "attachments": [
             {
                 "text": "Are you in?",
@@ -19,7 +19,7 @@ function makeInitialMessage(signedUp) {
                     {
                         "name": "imIn",
                         "text": ":soccer: I'm in",
-                        "style": "primary",
+                        "style": "default",
                         "type": "button",
                         "value": true,
                     },
@@ -34,53 +34,64 @@ function makeInitialMessage(signedUp) {
             }
         ]
     };
+    if (dropouts.length > 0) {
+        msg.attachments[0].fields.push({
+            "title": "Dropped out",
+            "value": dropouts.map(function (user) {
+                return '<@' + user + '>';
+            }).join(),
+        });
+    }
     if (signedUp.length > 0) {
         msg.attachments[0].fields.push({
             "title": "Signed up",
-            "value": signedUp.join(),
+            "value": signedUp.map(function (user) {
+                return '<@' + user + '>';
+            }).join(),
+        });
+    }
+    if (signedUp.length == 10) {
+        msg.attachments[0].actions.push({
+            "name": "close",
+            "text": "Close",
+            "style": "primary",
+            "type": "button",
+            "value": true,
         });
     }
     return msg;
 }
 
 
-function makeFinalMessage(signedUp) {
+function makeFinalMessage(signedUp, dropouts) {
     return {
-        "text": "Sign up open for next Monday night! 7pm, £3 at Peffermill as usual.",
+        "text": "Sign up for football fives closed! :tada:",
         "attachments": [
             {
-                "text": "That's all folks",
-                "color": "#3AA3E3",
+                "color": "good",
                 "callback_id": "final",
                 "attachment_type": "default",
                 "fields": [
                     {
                         "title": "Signed up",
-                        "value": signedUp.join(),
-                    }
-                ],
-                "actions": [
+                        "value": signedUp.map(function (user) {
+                            return '<@' + user + '>';
+                        }).join(),
+                    },
                     {
-                        "name": "notIn",
-                        "text": "I'm not in",
-                        "style": "danger",
-                        "type": "button",
-                        "value": true,
+                        "title": "Location",
+                        "value": "Peffermill",
+                        "short": true
+                    },
+                    {
+                        "title": "Time",
+                        "value": "7pm",
+                        "short": true
                     }
                 ]
             }
         ]
     };
-}
-
-
-function makeMessage(signedUp) {
-    if (signedUp.length == 10) {
-        return makeFinalMessage(signedUp);
-    } else {
-        return makeInitialMessage(signedUp);
-    }
-
 }
 
 function removeUser(userList, user) {
@@ -100,13 +111,42 @@ function addUser(userList, user) {
     return userList;
 }
 
-
 function addUsers(userList, usersToAdd) {
     for (var i = 0; i++; i < usersToAdd.length) {
         var userToAdd = usersToAdd[i];
         addUser(userList, userToAdd);
     }
     return userList;
+}
+
+
+function getUsersByTitle(message, title) {
+    var attachments = message.original_message.attachments;
+    for (i = 0; i < attachments.length ; i++) {
+        var attachment = attachments[i];
+        if (!attachment.fields) {
+            continue;
+        }
+        var field = attachment.fields.find(function (f) {
+            return f.title == title;
+        });
+        if (!field) {
+            continue;
+        }
+        return field.value.split(',').map(function (u) {
+            return u.substring(2, u.length - 1);
+        });
+    }
+    return [];
+}
+
+function getDropouts(message) {
+    return getUsersByTitle(message, 'Dropped out');
+}
+
+
+function getSignedUp(message) {
+    return getUsersByTitle(message, 'Signed up');
 }
 
 
@@ -117,7 +157,7 @@ var controller = Botkit.slackbot({
     // rtm_receive_messages: false,
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    scopes: ['commands', 'users:read', 'chat:write:bot'],
+    scopes: ['commands', 'chat:write:bot'],
 });
 
 controller.setupWebserver(process.env.PORT, function(err, webserver) {
@@ -138,29 +178,22 @@ controller.on('interactive_message_callback', function(bot, message) {
     }
 
     var action = message.actions[0].name;
-    console.log(JSON.stringify(message));
-    console.log(JSON.stringify(message.user));
-    bot.api.users.info({user: message.user}, function(error, resp) {
-        console.log(JSON.stringify(resp));
-        var username = resp.user.name;
-        controller.storage.channels.get(message.channel, function(err, data) {
-            var signedUp = data.signedUp;
-            var initiatedBy = data.initiatedBy;
-            if (action == 'notIn') {
-                removeUser(signedUp, username);
-                // bot.replyPrivateDelayed(message, 'Yo, you should let the team know you pulled out.');
-            } else if (action == 'imIn') {
-                addUser(signedUp, username);
-            }
-            bot.replyInteractive(message, makeMessage(signedUp));
-            controller.storage.channels.save({
-                id: message.channel,
-                initiatedBy: initiatedBy,
-                originalMessage: data.originalMessage,
-                signedUp: signedUp
-            });
-        });
-    });
+    var username = message.user;
+
+    var signedUp = getSignedUp(message);
+    var dropouts = getDropouts(message);
+
+    if (action == 'notIn') {
+        removeUser(signedUp, username);
+        addUser(dropouts, username);
+        bot.replyInteractive(message, makeInitialMessage(signedUp, dropouts));
+    } else if (action == 'imIn') {
+        removeUser(dropouts, username);
+        addUser(signedUp, username);
+        bot.replyInteractive(message, makeInitialMessage(signedUp, dropouts));
+    } else if (action == 'close') {
+        bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
+    }
 });
 
 
@@ -168,40 +201,5 @@ controller.on('slash_command', function(bot, message) {
     if (message.command !== '/jose') {
         return;
     }
-    if (message.text.startsWith('start')) {
-        var players = message.text.slice(5).split(' ').splice(1);
-        bot.replyPublic(message, makeInitialMessage(players));
-        controller.storage.channels.save({
-            id: message.channel,
-            initiatedBy: message.user,
-            originalMessage: message,
-            signedUp: players
-        });
-        // bot.replyPrivateDelayed(message, 'Type /jose add <player name> to add players manually.');
-    } else if (message.text.startsWith('add')) {
-        // controller.storage.channels.get(message.channel, function(err, data) {
-            // if (data.initiatedBy === message.user) {
-                // var players = message.text.slice(5).split(' ').splice(1);
-                // addUsers(data.signedUp, players);
-                // bot.replyInteractive(data.originalMessage, makeMessage(data.signedUp));
-                // controller.storage.channels.save({
-                    // id: message.channel,
-                    // initiatedBy: data.initiatedBy,
-                    // originalMessage: data.originalMessage,
-                    // signedUp: data.signedUp
-                // }, function(err) {
-                    // if (err) {
-                        // console.log(err);
-                    // }
-                // });
-            // } else {
-                // bot.replyPrivateDelayed(message, 'Only the person who initiated the poll can add players manually.');
-            // }
-        // });
-    }
-
-    // and then continue to use replyPublicDelayed or replyPrivateDelayed
-    // bot.replyPublicDelayed(message, 'This is a public reply to the ' + message.command + ' slash command!');
-
-    // bot.replyPrivateDelayed(message, ':dash:');
+    bot.replyPublic(message, makeInitialMessage([], []));
 });
