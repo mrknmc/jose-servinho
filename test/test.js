@@ -1,5 +1,4 @@
 var assert = require('assert');
-var sinon = require('sinon');
 var bot = require('../bot');
 
 describe('tests', function() {
