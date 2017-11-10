@@ -222,8 +222,10 @@ function run() {
             bot.replyInteractive(message, makeMessage(signedUp, dropouts));
         } else if (action == 'addFriend') {
             addUser(signedUp, username + '-friend');
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
         } else if (action == 'removeFriend') {
             removeUser(signedUp, username + '-Friend');
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
         } else if (action == 'close') {
             bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
         }
