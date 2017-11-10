@@ -7,7 +7,12 @@ const SIGNED_UP_TITLE = 'Signed up';
 
 
 function randomChoice(myArray) {
-    return myArray[Math.floor(Math.random() * myArray.length)];
+    while (True) {
+        var choice = myArray[Math.floor(Math.random() * myArray.length)];
+        if (!choice.endsWith('friend')) {
+            return choice
+        }
+    }
 }
 
 function makeMessage(signedUp, dropouts) {
@@ -46,7 +51,7 @@ function makeMessage(signedUp, dropouts) {
                     {
                         "name": "removeFriend",
                         "text": "Remove a friend",
-                        "style": "danger",
+                        "style": "default",
                         "type": "button",
                         "value": true,
                     }
@@ -58,6 +63,9 @@ function makeMessage(signedUp, dropouts) {
         msg.attachments[0].fields.push({
             "title": DROPOUTS_TITLE,
             "value": dropouts.map(function (user) {
+                if (user.endsWith('-friend')) {
+                    return '<@' + user.split('-friend')[0] + '> (Friend)';
+                }
                 return '<@' + user + '>';
             }).join(),
         });
@@ -66,6 +74,9 @@ function makeMessage(signedUp, dropouts) {
         msg.attachments[0].fields.push({
             "title": SIGNED_UP_TITLE,
             "value": signedUp.map(function (user) {
+                if (user.endsWith('-friend')) {
+                    return '<@' + user.split('-friend')[0] + '> (Friend)';
+                }
                 return '<@' + user + '>';
             }).join(),
         });
@@ -95,6 +106,9 @@ function makeFinalMessage(signedUp, dropouts) {
                     {
                         "title": SIGNED_UP_TITLE,
                         "value": signedUp.map(function (user) {
+                            if (user.endsWith('-friend')) {
+                                return '<@' + user.split('-friend')[0] + '> (Friend)';
+                            }
                             return '<@' + user + '>';
                         }).join(),
                     },
@@ -207,9 +221,9 @@ function run() {
             addUser(signedUp, username);
             bot.replyInteractive(message, makeMessage(signedUp, dropouts));
         } else if (action == 'addFriend') {
-            addUser(signedUp, username + ' (Friend)');
+            addUser(signedUp, username + '-friend');
         } else if (action == 'removeFriend') {
-            removeUser(signedUp, username + ' (Friend)');
+            removeUser(signedUp, username + '-Friend');
         } else if (action == 'close') {
             bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
         }
