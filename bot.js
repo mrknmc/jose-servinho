@@ -6,6 +6,10 @@ const DROPOUTS_TITLE = 'Dropped out';
 const SIGNED_UP_TITLE = 'Signed up';
 
 
+function randomChoice(myArray) {
+    return myArray[Math.floor(Math.random() * myArray.length)];
+}
+
 function makeMessage(signedUp, dropouts) {
     var msg = {
         "text": "Sign up open for football fives next Monday night! 7pm, £3 at Peffermill as usual.",
@@ -93,6 +97,10 @@ function makeFinalMessage(signedUp, dropouts) {
                         "value": signedUp.map(function (user) {
                             return '<@' + user + '>';
                         }).join(),
+                    },
+                    {
+                        "title": "Who's paying?",
+                        "value": "<@" + randomChoice(signedUp) + ">",
                     },
                     {
                         "title": "Location",
