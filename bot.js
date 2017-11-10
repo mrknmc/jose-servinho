@@ -31,6 +31,20 @@ function makeMessage(signedUp, dropouts) {
                         "style": "danger",
                         "type": "button",
                         "value": true,
+                    },
+                    {
+                        "name": "addFriend",
+                        "text": "Add a friend",
+                        "style": "default",
+                        "type": "button",
+                        "value": true,
+                    },
+                    {
+                        "name": "removeFriend",
+                        "text": "Remove a friend",
+                        "style": "danger",
+                        "type": "button",
+                        "value": true,
                     }
                 ]
             }
@@ -184,6 +198,10 @@ function run() {
             removeUser(dropouts, username);
             addUser(signedUp, username);
             bot.replyInteractive(message, makeMessage(signedUp, dropouts));
+        } else if (action == 'addFriend') {
+            addUser(signedUp, username + ' (Friend)');
+        } else if (action == 'removeFriend') {
+            removeUser(signedUp, username + ' (Friend)');
         } else if (action == 'close') {
             bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
         }
