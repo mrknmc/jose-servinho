@@ -224,7 +224,7 @@ function run() {
             addUser(signedUp, username + '-friend');
             bot.replyInteractive(message, makeMessage(signedUp, dropouts));
         } else if (action == 'removeFriend') {
-            removeUser(signedUp, username + '-Friend');
+            removeUser(signedUp, username + '-friend');
             bot.replyInteractive(message, makeMessage(signedUp, dropouts));
         } else if (action == 'close') {
             bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
