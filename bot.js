@@ -164,8 +164,15 @@ function getUsersByTitle(message, title) {
             continue;
         }
         return field.value.split(',').map(function (u) {
-            return u.substring(2, u.length - 1);
-        });
+            if (u.endsWith(' (Friend)')) {
+                // strip " (Friend)", strip "<@...>", add "-friend"
+                var originalUser = u.split(' ')[0];
+                return originalUser.substring(2, originalUser.length - 1) + '-friend';
+            }
+            else {
+                return u.substring(2, u.length - 1);
+            }
+        })
     }
     return [];
 }

@@ -45,7 +45,7 @@ describe('tests', function() {
                                 title: 'nah'
                             },
                             {
-                                value: '<@user1>,<@user2>',
+                                value: '<@user1>,<@user2>,<@user3> (Friend)',
                                 title: 'title'
                             }
                         ]
@@ -55,7 +55,7 @@ describe('tests', function() {
         };
 
         var users = bot.getUsersByTitle(message, 'title');
-        assert.deepEqual(users, ['user1', 'user2']);
+        assert.deepEqual(users, ['user1', 'user2', 'user3-friend']);
     });
 
     it('Should return empty when no such field', function() {
