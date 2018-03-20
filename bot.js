@@ -7,7 +7,7 @@ const SIGNED_UP_TITLE = 'Signed up';
 
 
 function randomChoice(myArray) {
-    while (True) {
+    while (true) {
         var choice = myArray[Math.floor(Math.random() * myArray.length)];
         if (!choice.endsWith('friend')) {
             return choice
