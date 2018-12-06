@@ -82,12 +82,12 @@ describe('tests', function() {
     });
 
     it('Should return tuesday if string contains "Tuesday"', function() {
-	var result = bot.getDayOfWeek('Sign up open for football fives next Tuesday night! 6-7pm at Boroughmuir High School.');
-	assert.isEqual(result, 'tuesday');
+	var result = bot.getDayOfWeek({original_message: {text: 'Sign up open for football fives next Tuesday night! 6-7pm at Boroughmuir High School.'}});
+	assert.equal(result, 'tuesday');
     });
 
     it('Should return monday if string does not contain "Tuesday"', function() {
-	var result = bot.getDayOfWeek('Sign up open for football fives next Monday night! 7-8pm at Peffermill.');
-	assert.isEqual(result, 'monday');
+	var result = bot.getDayOfWeek({original_message: {text: 'Sign up open for football fives next Monday night! 7-8pm at Peffermill.'}});
+	assert.equal(result, 'monday');
     });
 });

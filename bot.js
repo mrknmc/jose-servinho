@@ -183,7 +183,7 @@ function getUsersByTitle(message, title) {
 
 function getDayOfWeek(message) {
     var text = message.original_message.text;
-    if (text.contains('Tuesday')) {
+    if (text.includes('Tuesday')) {
 	return 'tuesday';
     }
     return 'monday';
@@ -271,3 +271,4 @@ if (require.main === module) {
 exports.addUser = addUser;
 exports.removeUser = removeUser;
 exports.getUsersByTitle = getUsersByTitle;
+exports.getDayOfWeek = getDayOfWeek;
