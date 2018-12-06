@@ -15,9 +15,12 @@ function randomChoice(myArray) {
     }
 }
 
-function makeMessage(signedUp, dropouts) {
+function makeMessage(signedUp, dropouts, dayOfWeek) {
+    var text = dayOfWeek === 'tuesday'
+	? "Sign up open for football fives next Tuesday night! 6-7pm at Boroughmuir High School."
+	: "Sign up open for football fives next Monday night! 7-8pm at Peffermill.";
     var msg = {
-        "text": "Sign up open for football fives next Monday night! 7pm, £3 at Peffermill as usual.",
+        "text": text,
         "attachments": [
             {
                 "text": "Are you in?",
@@ -177,6 +180,15 @@ function getUsersByTitle(message, title) {
     return [];
 }
 
+
+function getDayOfWeek(message) {
+    var text = message.original_message.text;
+    if (text.contains('Tuesday')) {
+	return 'tuesday';
+    }
+    return 'monday';
+}
+
 function getDropouts(message) {
     return getUsersByTitle(message, DROPOUTS_TITLE);
 }
@@ -218,21 +230,22 @@ function run() {
 
         var signedUp = getSignedUp(message);
         var dropouts = getDropouts(message);
+	var dayOfWeek = getDayOfWeek(message);
 
         if (action == 'notIn') {
             removeUser(signedUp, username);
             addUser(dropouts, username);
-            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts, dayOfWeek));
         } else if (action == 'imIn') {
             removeUser(dropouts, username);
             addUser(signedUp, username);
-            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts, dayOfWeek));
         } else if (action == 'addFriend') {
             addUser(signedUp, username + '-friend');
-            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts, dayOfWeek));
         } else if (action == 'removeFriend') {
             removeUser(signedUp, username + '-friend');
-            bot.replyInteractive(message, makeMessage(signedUp, dropouts));
+            bot.replyInteractive(message, makeMessage(signedUp, dropouts, dayOfWeek));
         } else if (action == 'close') {
             bot.replyInteractive(message, makeFinalMessage(signedUp, dropouts));
         }
@@ -243,7 +256,10 @@ function run() {
         if (message.command !== '/jose') {
             return;
         }
-        bot.replyPublic(message, makeMessage([], []));
+	if (message.text !== 'monday' && message.text !== 'tuesday') {
+	    return;
+	}
+        bot.replyPublic(message, makeMessage([], [], message.text));
     });
 
 }

@@ -80,4 +80,14 @@ describe('tests', function() {
         var users = bot.getUsersByTitle(message, 'title');
         assert.deepEqual(users, []);
     });
+
+    it('Should return tuesday if string contains "Tuesday"', function() {
+	var result = bot.getDayOfWeek('Sign up open for football fives next Tuesday night! 6-7pm at Boroughmuir High School.');
+	assert.isEqual(result, 'tuesday');
+    });
+
+    it('Should return monday if string does not contain "Tuesday"', function() {
+	var result = bot.getDayOfWeek('Sign up open for football fives next Monday night! 7-8pm at Peffermill.');
+	assert.isEqual(result, 'monday');
+    });
 });
